@@ -1198,6 +1198,9 @@ clear BuiltAudio
 BuiltAudio1(1:(sum(RandomDelay)+FixedDelay*nEventi+size(AudioCut,1)-1))=0;
 BuiltAudio2(1:(sum(RandomDelay)+FixedDelay*nEventi+size(AudioCut,1)-1))=0;
 
+handles.MyVar.SpatialShuffling.Min=-str2num(get(handles.EditLeftMaxShift,'String'));
+handles.MyVar.SpatialShuffling.Max=str2num(get(handles.EditRightMaxShift,'String'));
+
 RandomIntensities=1-(rand(1,nEventi).*str2num(get(handles.EditMaximumVolumeReduction,'String'))./100);
 RandomLocations=round(((rand(1,nEventi).*(handles.MyVar.SpatialShuffling.Min-handles.MyVar.SpatialShuffling.Max))-handles.MyVar.SpatialShuffling.Min)./2);
 
@@ -1271,11 +1274,48 @@ PlayRateWhiteNoise=round(get(handles.SliderWhiteNoiseFrequency,'Value'));
 NoiseRatio=get(handles.SliderNoiseRatio,'Value');
 TmpClick=BuiltAudioBackup;
 
+% Get broadband click shuffling
+BroadbandClickShuffling=get(handles.CheckboxBroadbandShuffling,'Value');
+
+% Check the lenght of the noise audiotrack
 SizeCheckValue=PlayRate*PlayRateClick/gcd(PlayRate,PlayRateClick);
-if (SizeCheckValue<2^31)
-    TmpClickNew=resample(TmpClick,PlayRate,PlayRateClick);
+
+% Resample the click-noise audiotrack
+if BroadbandClickShuffling
+    if (SizeCheckValue<2^31)
+        TmpClickNew1=resample(TmpClick',PlayRate,PlayRate/10*10)';
+        TmpClickNew2=resample(TmpClick',PlayRate,PlayRate/10*12)';
+        TmpClickNew3=resample(TmpClick',PlayRate,PlayRate/10*14)';
+        TmpClickNew4=resample(TmpClick',PlayRate,PlayRate/10*16)';
+        TmpClickNew5=resample(TmpClick',PlayRate,PlayRate/10*18)';
+        TmpClickNew6=resample(TmpClick',PlayRate,PlayRate/10*20)';
+        TmpClickNew7=resample(TmpClick',PlayRate,PlayRate/10*8)';
+        TmpClickNew8=resample(TmpClick',PlayRate,PlayRate/10*6)';
+        TmpClickNew9=resample(TmpClick',PlayRate,PlayRate/10*5)';
+        TmpClickNew10=resample(TmpClick',PlayRate,PlayRate/10*4)';
+        TmpClickNew11=resample(TmpClick',PlayRate,PlayRate/10*3)';
+    else
+        TmpClickNew1=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*10)';
+        TmpClickNew2=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*12)';
+        TmpClickNew3=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*14)';
+        TmpClickNew4=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*16)';
+        TmpClickNew5=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*18)';
+        TmpClickNew6=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*20)';
+        TmpClickNew7=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*8)';
+        TmpClickNew8=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*6)';
+        TmpClickNew9=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*5)';
+        TmpClickNew10=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*4)';
+        TmpClickNew11=resample(TmpClick',RoundPlayRate,RoundPlayRate/10*3)';
+    end
+    tmpWinSize=size(TmpClickNew6,2);
+    TmpClickNew=[TmpClickNew11(:,1:tmpWinSize) + TmpClickNew10(:,1:tmpWinSize) + TmpClickNew9(:,1:tmpWinSize) + TmpClickNew8(:,1:tmpWinSize) + TmpClickNew7(:,1:tmpWinSize) + TmpClickNew6(:,1:tmpWinSize) + TmpClickNew5(:,1:tmpWinSize) + TmpClickNew4(:,1:tmpWinSize) + TmpClickNew3(:,1:tmpWinSize) + TmpClickNew2(:,1:tmpWinSize) + TmpClickNew1(:,1:tmpWinSize)];
+    
 else
-    TmpClickNew=resample(TmpClick,RoundPlayRate,round(PlayRateClick/4));
+    if (SizeCheckValue<2^31)
+        TmpClickNew=resample(TmpClick',PlayRate,PlayRateClick)';
+    else
+        TmpClickNew=resample(TmpClick',RoundPlayRate,round(PlayRateClick/4))';
+    end
 end
 
 
